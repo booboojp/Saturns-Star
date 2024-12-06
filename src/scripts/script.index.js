@@ -101,3 +101,60 @@ window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 });
+function initGrid() {
+  const gridContainer = document.createElement('div');
+  gridContainer.id = 'grid-background';
+  document.body.prepend(gridContainer);
+
+  const columns = Math.floor(window.innerWidth / 50);
+  const rows = Math.floor(window.innerHeight / 50);
+  const total = rows * columns;
+
+  for (let i = 0; i < total; i++) {
+    const gridItem = document.createElement('div');
+    gridItem.className = 'grid-item';
+    gridItem.id = `grid-${i}`;
+    gridContainer.appendChild(gridItem);
+  }
+
+  function createPulse(clickX, clickY) {
+    const items = document.querySelectorAll('.grid-item');
+    const randomColor = `rgb(${Math.random()*255},${Math.random()*255},${Math.random()*255})`;
+    
+    items.forEach((item) => {
+      const rect = item.getBoundingClientRect();
+      const itemCenterX = rect.left + rect.width/2;
+      const itemCenterY = rect.top + rect.height/2;
+      
+      const distance = Math.sqrt(
+        Math.pow(itemCenterX - clickX, 2) + 
+        Math.pow(itemCenterY - clickY, 2)
+      );
+
+      anime({
+        targets: item,
+        backgroundColor: [
+          { value: randomColor, duration: 500, delay: distance },
+          { value: '#ffffff', duration: 500, delay: 500 + distance }
+        ],
+        easing: 'easeInOutQuad'
+      });
+    });
+  }
+
+  gridContainer.addEventListener('click', (e) => {
+    createPulse(e.clientX, e.clientY);
+  });
+
+  setTimeout(() => {
+    createPulse(window.innerWidth/2, window.innerHeight/2);
+  }, 1000);
+}
+window.addEventListener('resize', () => {
+  const gridContainer = document.getElementById('grid-background');
+  if (gridContainer) {
+    gridContainer.innerHTML = '';
+    initGrid();
+  }
+});
+initGrid();
